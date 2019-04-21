@@ -1,6 +1,7 @@
 
 import messages = require('./message');
 import $ = require("jquery");
+import { from } from 'rxjs/observable/from';
 
 let User = {
     name: '',
@@ -105,6 +106,13 @@ let bot = {
         $('#chat').append(`
             ${msg.get()}
         `);
+    },
+    renderError:function(form: any, msg: string){
+        form.append(`
+            <p class="error">
+                ${msg}
+            </p>
+        `);
     }
 };
 
@@ -112,21 +120,22 @@ let bot = {
 $(document).on('submit', 'form', function(event){
     //убираем перезагрузку страницы
     event.preventDefault();
-
-    //блочим инпут
-    $(this).find('input').prop('disabled', true);
-    //удаляем кнопку отправки
-    $(this).find('button').remove();
-    //добавляем кнопку редактировать
-    $(this).parent().append(inputs.edit);
+    //получаем инпут формы
+    let input = $(this).find('input');
 
     //получаем значение name input-а
-    let field = $(this).find('input').attr('name'); 
+    let field = input.attr('name'); 
 
     //получаем значение value этого инпута
     let value = $(this).find(`input[name="${field}"]`).val();
     //проверим или value != 0
     if(value != ''){  
+        //блочим инпут
+        input.prop('disabled', true);
+        //удаляем кнопку отправки
+        $(this).find('button').remove();
+        //добавляем кнопку редактировать
+        $(this).parent().append(inputs.edit);
         //получаем значение data-id form
         let id = $(this).data('id');
 
@@ -138,7 +147,12 @@ $(document).on('submit', 'form', function(event){
         scenario.nextStep(field);   
     }else{
         //выводим ошибку
-        scenario.step(field, true, field);
+        bot.renderError($(this), messages.error);
+        //подсвечиваем инпут
+        input.addClass('error');
+        //фокусим инпут
+        input.focus();
+        // scenario.step(field, true, field);
     }
 });
 
@@ -154,6 +168,13 @@ $(document).on('click', 'button[data-js="edit"]', function(){
     scenario.step(form_id, false, form_id);
 });
 
+//удаляем сообщение об ошибке, если оно есть
+$(document).on('change paste keyup', 'input', function(){
+    //удаляем сообщение
+    $(this).parents('form').find('p.error').remove();
+    //удаляем подсветку инпута
+    $(this).removeClass('error');
+});
 //готовим inputs
 
 function string_prepare(str: string , target: string){

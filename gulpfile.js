@@ -9,6 +9,11 @@ var tsify 		= require('tsify');
 var source 		= require('vinyl-source-stream');
 var buffer 		= require('vinyl-buffer');
 
+
+//http://typescript-lang.ru/docs/tutorials/Gulp.html
+
+var tsProject = typescript.createProject("tsconfig.json");
+
 gulp.task('hello', function()
 {
 	console.log('Waaazzuuuuuppp');
